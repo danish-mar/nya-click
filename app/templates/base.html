@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PhotoClick{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .btn-primary {
+            background-color: #0071e3;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #0077ED;
+        }
+
+        .image-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .image-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0071e3', // Apple blue
+                        secondary: '#86868b', // Apple gray
+                        dark: '#1d1d1f', // Apple dark text
+                        light: '#f5f5f7', // Apple light background
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-light text-dark font-sans min-h-screen flex flex-col">
+
+    <!-- Minimal Navbar -->
+    <nav class="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-10">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <!-- Logo -->
+                <a href="/" class="text-xl font-semibold text-dark">
+                    PhotoClick
+                </a>
+
+                <!-- Navigation Links (Desktop) -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="/" class="text-dark hover:text-primary text-sm font-medium">Home</a>
+                    <a href="#" class="text-dark hover:text-primary text-sm font-medium">Gallery</a>
+                    <a href="#" class="text-dark hover:text-primary text-sm font-medium">About</a>
+                    <a href="#" class="text-dark hover:text-primary text-sm font-medium">Contact</a>
+                </div>
+
+                <!-- User Actions -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <a href="#" class="text-dark hover:text-primary text-sm font-medium">
+                        <i class="fas fa-user mr-1"></i> Sign In
+                    </a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-button" class="md:hidden text-dark focus:outline-none" aria-label="Toggle Mobile Menu">
+                    <i class="fas fa-bars text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Mobile Menu (Hidden by default) -->
+            <div id="mobile-menu" class="md:hidden hidden mt-4 pb-2">
+                <div class="flex flex-col space-y-4">
+                    <a href="/" class="text-dark hover:text-primary text-sm">Home</a>
+                    <a href="#" class="text-dark hover:text-primary text-sm">Gallery</a>
+                    <a href="#" class="text-dark hover:text-primary text-sm">About</a>
+                    <a href="#" class="text-dark hover:text-primary text-sm">Contact</a>
+                    <a href="#" class="text-dark hover:text-primary text-sm"><i class="fas fa-user mr-1"></i> Sign In</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Minimal Footer -->
+    <footer class="bg-white border-t border-gray-200 py-8 mt-8">
+        <div class="container mx-auto px-6 text-center text-secondary text-sm">
+            <p>&copy; 2025 PhotoClick. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript to toggle mobile menu -->
+    <script>
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+    </script>
+</body>
+</html>

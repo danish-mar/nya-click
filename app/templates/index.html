@@ -1,0 +1,164 @@
+<!-- app/templates/index.html -->
+{% extends 'base.html' %}
+
+{% block title %}Home - PhotoClick{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-6 py-12">
+    <h1 class="text-4xl font-semibold text-center mb-4">PhotoClick</h1>
+    <p class="text-secondary text-center mb-12 max-w-2xl mx-auto">Discover and share beautiful moments captured through your lens.</p>
+
+    <!-- Minimal Search Bar -->
+    <div class="max-w-xl mx-auto mb-12">
+        <div class="relative">
+            <input type="text" id="search-input" class="w-full px-5 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-dark" placeholder="Search images...">
+            <span class="absolute right-4 top-3.5 text-secondary">
+                <i class="fas fa-search"></i>
+            </span>
+        </div>
+    </div>
+
+    <!-- Image Gallery -->
+    <div id="image-gallery" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Images will be loaded here -->
+    </div>
+
+    <!-- No Results Message -->
+    <div id="no-results" class="hidden text-center py-12">
+        <p class="text-secondary text-lg">No images found. Try a different search.</p>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const imageGallery = document.getElementById('image-gallery');
+        const noResults = document.getElementById('no-results');
+        const searchInput = document.getElementById('search-input');
+
+        // Function to fetch and display images
+        const fetchAndDisplayImages = async (searchTerm = '') => {
+            try {
+                const response = await fetch('/api/images');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch images');
+                }
+                const images = await response.json();
+
+                // Filter images based on search term
+                const filteredImages = images.filter(image => {
+                    const lowerSearchTerm = searchTerm.toLowerCase();
+                    return image.title.toLowerCase().includes(lowerSearchTerm) ||
+                           image.desc.toLowerCase().includes(lowerSearchTerm);
+                });
+
+                // Clear previous images
+                imageGallery.innerHTML = '';
+
+                // Toggle no results message
+                if (filteredImages.length === 0) {
+                    imageGallery.classList.add('hidden');
+                    noResults.classList.remove('hidden');
+                } else {
+                    imageGallery.classList.remove('hidden');
+                    noResults.classList.add('hidden');
+
+                    filteredImages.forEach(image => {
+                        // Extract just the file name from the path for display
+                        const fileName = image.location.split('/').pop();
+
+                        const imageCard = `
+                            <div class="image-card bg-white rounded-xl shadow-sm overflow-hidden">
+                                <div class="aspect-w-16 aspect-h-10 w-full">
+                                    <img src="${image.location}" alt="${image.title}" class="w-full h-64 object-cover">
+                                </div>
+                                <div class="p-6">
+                                    <h3 class="font-medium text-xl mb-2">${image.title}</h3>
+                                    <p class="text-secondary mb-4">${image.desc}</p>
+
+                                    <div class="flex items-center justify-between text-xs text-secondary">
+                                        <div class="flex items-center">
+                                            <i class="fas fa-calendar-alt mr-1"></i>
+                                            <span>${new Date(image.date).toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'})}</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <i class="fas fa-heart mr-1"></i>
+                                            <span>${image.like_count}</span>
+                                        </div>
+                                    </div>
+
+                                    <button class="btn-primary text-white rounded-lg py-2 px-4 w-full mt-4 font-medium text-sm"
+                                            onclick="toggleComments(${image.image_id})">
+                                        Comments
+                                    </button>
+
+                                    <div id="comments-${image.image_id}" class="mt-4 pt-3 border-t border-gray-100 hidden">
+                                        <div class="comments-container"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        imageGallery.insertAdjacentHTML('beforeend', imageCard);
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching images:', error);
+                imageGallery.innerHTML = '<p class="text-red-500 text-center w-full">Unable to load images at this time.</p>';
+            }
+        };
+
+        // Function to toggle comments visibility and load them
+        window.toggleComments = async (imageId) => {
+            const commentsSection = document.getElementById(`comments-${imageId}`);
+            const commentsContainer = commentsSection.querySelector('.comments-container');
+
+            // Toggle visibility
+            if (commentsSection.classList.contains('hidden')) {
+                commentsSection.classList.remove('hidden');
+
+                // Show loading indicator
+                commentsContainer.innerHTML = '<p class="text-center text-secondary"><i class="fas fa-spinner fa-spin mr-2"></i>Loading comments...</p>';
+
+                try {
+                    const response = await fetch(`/api/comments/${imageId}`);
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch comments');
+                    }
+
+                    const comments = await response.json();
+                    commentsContainer.innerHTML = '';
+
+                    if (comments.length === 0) {
+                        commentsContainer.innerHTML = '<p class="text-secondary text-sm text-center py-2">No comments yet</p>';
+                    } else {
+                        comments.forEach(comment => {
+                            const commentCard = `
+                                <div class="mb-3 bg-light rounded-lg p-3 text-sm">
+                                    <p>${comment.comment}</p>
+                                </div>
+                            `;
+                            commentsContainer.insertAdjacentHTML('beforeend', commentCard);
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error fetching comments:', error);
+                    commentsContainer.innerHTML = '<p class="text-red-500 text-sm">Unable to load comments</p>';
+                }
+            } else {
+                commentsSection.classList.add('hidden');
+            }
+        };
+
+        // Initial fetch
+        fetchAndDisplayImages();
+
+        // Search functionality with debounce
+        let debounceTimeout;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(() => {
+                fetchAndDisplayImages(searchInput.value);
+            }, 300);
+        });
+    });
+</script>
+{% endblock %}
