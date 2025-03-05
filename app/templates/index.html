@@ -35,6 +35,8 @@
         const noResults = document.getElementById('no-results');
         const searchInput = document.getElementById('search-input');
 
+
+
         // Function to fetch and display images
         const fetchAndDisplayImages = async (searchTerm = '') => {
             try {
@@ -65,11 +67,13 @@
                     filteredImages.forEach(image => {
                         // Extract just the file name from the path for display
                         const fileName = image.location.split('/').pop();
+                        
 
                         const imageCard = `
                             <div class="image-card bg-white rounded-xl shadow-sm overflow-hidden">
                                 <div class="aspect-w-16 aspect-h-10 w-full">
-                                    <img src="${image.location}" alt="${image.title}" class="w-full h-64 object-cover">
+                                    <img src="${image.location}" alt="${image.title}" class="w-full h-64 object-cover cursor-pointer"
+                                         onclick="window.open('/image/${image.image_id}', '_blank')">
                                 </div>
                                 <div class="p-6">
                                     <h3 class="font-medium text-xl mb-2">${image.title}</h3>
@@ -104,6 +108,8 @@
                 console.error('Error fetching images:', error);
                 imageGallery.innerHTML = '<p class="text-red-500 text-center w-full">Unable to load images at this time.</p>';
             }
+
+
         };
 
         // Function to toggle comments visibility and load them
@@ -159,6 +165,7 @@
                 fetchAndDisplayImages(searchInput.value);
             }, 300);
         });
+
     });
 </script>
 {% endblock %}

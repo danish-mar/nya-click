@@ -1,0 +1,214 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}User Management{% endblock %}
+
+{% block content %}
+    <div class="space-y-6">
+        <div class="flex items-center justify-between">
+            <h1 class="text-3xl font-semibold text-apple-dark">User Management</h1>
+            <div class="relative">
+                <input type="text" id="user-search" placeholder="Search users..."
+                       class="pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:ring-apple-blue focus:border-apple-blue">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fas fa-search text-gray-400"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="apple-card p-6 shadow">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-apple-gray uppercase tracking-wider">
+                            User
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-apple-gray uppercase tracking-wider">
+                            Email
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-apple-gray uppercase tracking-wider">
+                            Joined
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-apple-gray uppercase tracking-wider">
+                            Status
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-apple-gray uppercase tracking-wider">
+                            Activity
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-apple-gray uppercase tracking-wider">
+                            Actions
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="users-table-body">
+                    {% for user in users %}
+                        <tr class="user-row">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="h-10 w-10 flex-shrink-0 rounded-full bg-apple-blue text-white flex items-center justify-center">
+                                        <span class="font-medium">{{ user.username[:1].upper() }}</span>
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-apple-dark">{{ user.username }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-apple-gray">{{ user.email }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                Active
+                            </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <button class="text-apple-blue hover:text-apple-hover focus:outline-none"
+                                        onclick="showUserModal('{{ user.id }}', '{{ user.username }}')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                <div class="flex-1 flex justify-between sm:hidden">
+                    <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-apple-gray bg-white hover:bg-gray-50">
+                        Previous
+                    </a>
+                    <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-apple-gray bg-white hover:bg-gray-50">
+                        Next
+                    </a>
+                </div>
+                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-sm text-apple-gray">
+                            Showing <span class="font-medium">1</span> to <span class="font-medium">{{ users|length }}</span> of <span class="font-medium">{{ users|length }}</span> users
+                        </p>
+                    </div>
+                    <div>
+                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                            <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-apple-gray hover:bg-gray-50">
+                                <span class="sr-only">Previous</span>
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                            <a href="#" aria-current="page" class="z-10 bg-apple-blue border-apple-blue text-white relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                                1
+                            </a>
+                            <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-apple-gray hover:bg-gray-50">
+                                <span class="sr-only">Next</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Detail Modal -->
+    <div id="user-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-semibold text-apple-dark">User Details</h3>
+                    <button onclick="closeUserModal()" class="text-apple-gray hover:text-apple-dark">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6" id="user-modal-content">
+                <!-- Content will be loaded dynamically -->
+                <div class="flex flex-col items-center text-center mb-6">
+                    <div class="h-20 w-20 rounded-full bg-apple-blue text-white flex items-center justify-center text-3xl mb-4">
+                        <span class="font-medium" id="modal-user-initial">U</span>
+                    </div>
+                    <h4 class="text-xl font-semibold text-apple-dark" id="modal-username">Username</h4>
+                    <p class="text-apple-gray" id="modal-email">user@example.com</p>
+                    <p class="text-apple-gray mt-1" id="modal-joined-date">Joined: Jan 1, 2023</p>
+
+                    <div class="mt-4">
+                    <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                        Active
+                    </span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="p-4 bg-gray-50 rounded-lg text-center">
+                        <p class="text-apple-gray text-sm">Comments</p>
+                        <p class="text-xl font-medium text-apple-dark" id="modal-comment-count">24</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg text-center">
+                        <p class="text-apple-gray text-sm">Likes</p>
+                        <p class="text-xl font-medium text-apple-dark" id="modal-like-count">58</p>
+                    </div>
+                </div>
+
+                <h5 class="font-medium text-apple-dark mb-3">Recent Activity</h5>
+                <div class="space-y-3" id="modal-recent-activity">
+                    <!-- Placeholder for recent activity -->
+                </div>
+            </div>
+            <div class="p-6 border-t bg-gray-50 flex justify-end space-x-3">
+                <button class="px-4 py-2 border border-gray-300 rounded-full text-apple-gray font-medium hover:bg-gray-100"
+                        onclick="closeUserModal()">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Search functionality
+        document.getElementById('user-search').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('.user-row');
+
+            rows.forEach(row => {
+                const username = row.querySelector('.text-sm.font-medium').textContent.toLowerCase();
+                const email = row.querySelector('.text-sm.text-apple-gray').textContent.toLowerCase();
+
+                if (username.includes(searchTerm) || email.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        // User modal functions
+        function showUserModal(userId, username) {
+            // In a real application, you would fetch user details from an API
+            // Here we just show a simple modal with mock data
+            document.getElementById('modal-user-initial').textContent = username[0].toUpperCase();
+            document.getElementById('modal-username').textContent = username;
+            document.getElementById('modal-email').textContent = username + '@example.com';
+            document.getElementById('modal-joined-date').textContent = 'Joined: Jan 1, 2023';
+            document.getElementById('modal-comment-count').textContent = Math.floor(Math.random() * 30);
+            document.getElementById('modal-like-count').textContent = Math.floor(Math.random() * 50);
+
+            // Show some recent activity
+            const activities = [
+                'Liked a photo "Mountain Sunset" - 2 days ago',
+                'Commented on "Beach Vacation" - 4 days ago',
+                'Liked a photo "City Skyline" - 1 week ago'
+            ];
+
+            let activityHTML = '';
+            activities.forEach(activity => {
+                activityHTML += `<div class="p-3 bg-white border border-gray-100 rounded-lg text-sm">${activity}</div>`;
+            });
+
+            document.getElementById('modal-recent-activity').innerHTML = activityHTML;
+            document.getElementById('user-modal').classList.remove('hidden');
+        }
+
+        function closeUserModal() {
+            document.getElementById('user-modal').classList.add('hidden');
+        }
+    </script>
+{% endblock %}

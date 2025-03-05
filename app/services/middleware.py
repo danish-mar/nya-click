@@ -8,7 +8,7 @@ def login_required(f):
 
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        session_token = request.headers.get('Authorization')
+        session_token = request.cookies.get("session_id")
 
         if not session_token or not AuthManager.get_user(session_token):
             return jsonify({'error': 'Unauthorized access'}), 401  # Return 401 if not logged in

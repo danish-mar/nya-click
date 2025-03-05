@@ -6,18 +6,26 @@ from app.services.auth_manager import AuthManager
 
 like_bp = Blueprint('like_bp', __name__)
 
-@like_bp.route('/<int:image_id>/like', methods=['POST'])
+
+@like_bp.route('/image/<int:image_id>/like', methods=['POST'])
 @login_required
 def like_image(image_id):
     """Like an image"""
-    session_token = request.headers.get('Authorization')
-    user_id = AuthManager.get_user(session_token)
-    new_like = LikeManager.like_image(user_id, image_id)
-    if new_like:
-        return jsonify({'message': 'Image liked!'}), 201
-    return jsonify({'message': 'Already liked'}), 400
+    try:
+        session_token = request.cookies.get("session_id")
+        user_id = AuthManager.get_user(session_token)
+        new_like = LikeManager.like_image(user_id, image_id)
 
-@like_bp.route('/<int:image_id>/like', methods=['DELETE'])
+        print(session_token, user_id, new_like)
+
+        if new_like:
+            return jsonify({'message': 'Image liked!'}), 201
+        return jsonify({'message': 'Already liked'}), 400
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@like_bp.route('/image/<int:image_id>/like', methods=['DELETE'])
 @login_required
 def unlike_image(image_id):
     session_id = request.headers.get("Authorization")

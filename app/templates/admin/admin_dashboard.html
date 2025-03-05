@@ -1,0 +1,133 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+    <div class="space-y-8">
+        <div class="flex justify-between items-center">
+            <h1 class="text-3xl font-semibold text-apple-dark">Dashboard</h1>
+            <a href="{{ url_for('api.admin_bp.upload_image') }}" class="apple-btn text-white py-2 px-4 font-medium">
+                <i class="fas fa-plus mr-2"></i>Upload New
+            </a>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="apple-card p-6 shadow">
+                <div class="flex items-center">
+                    <div class="rounded-full bg-blue-100 p-3 mr-4">
+                        <i class="fas fa-users text-apple-blue text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-apple-gray text-sm">Total Users</p>
+                        <p class="text-3xl font-semibold text-apple-dark">{{ users }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="apple-card p-6 shadow">
+                <div class="flex items-center">
+                    <div class="rounded-full bg-purple-100 p-3 mr-4">
+                        <i class="fas fa-images text-purple-500 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-apple-gray text-sm">Total Images</p>
+                        <p class="text-3xl font-semibold text-apple-dark">{{ images }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="apple-card p-6 shadow">
+                <div class="flex items-center">
+                    <div class="rounded-full bg-green-100 p-3 mr-4">
+                        <i class="fas fa-comments text-green-500 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-apple-gray text-sm">Comments</p>
+                        <p class="text-3xl font-semibold text-apple-dark">{{ comments }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="apple-card p-6 shadow">
+                <div class="flex items-center">
+                    <div class="rounded-full bg-red-100 p-3 mr-4">
+                        <i class="fas fa-heart text-red-500 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-apple-gray text-sm">Likes</p>
+                        <p class="text-3xl font-semibold text-apple-dark">{{ likes }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Images -->
+        <div class="apple-card p-6 shadow">
+            <h2 class="text-xl font-medium text-apple-dark mb-4">Recent Images</h2>
+
+            {% if recent_images and recent_images|length > 0 %}
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-apple-gray uppercase tracking-wider">
+                                Image
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-apple-gray uppercase tracking-wider">
+                                Title
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-apple-gray uppercase tracking-wider">
+                                Date
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-apple-gray uppercase tracking-wider">
+                                Actions
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                        {% for image in recent_images %}
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <img src="{{ url_for('static', filename=image.location.replace('static/', '')) if image.location else '/static/images/default.jpg' }}"
+                                         alt="{{ image.title if image.title else 'No Title' }}"
+                                         class="h-16 w-16 object-cover rounded-md">
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-apple-dark">
+                                        {{ image.title if image.title else 'Untitled' }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-apple-gray">
+                                        {{ image.date.strftime('%b %d, %Y') if image.date else 'No Date' }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <a href="{{ url_for('api.admin_bp.image_details', image_id=image.image_id) }}"
+                                       class="text-apple-blue hover:text-apple-hover mr-3">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ url_for('api.admin_bp.edit_image', image_id=image.image_id) }}"
+                                       class="text-green-500 hover:text-green-600 mr-3">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form action="{{ url_for('api.admin_bp.delete_image', image_id=image.image_id) }}" method="POST" style="display:inline;">
+                                        <button type="submit" class="text-red-500 hover:text-red-600 mr-3 border-none bg-transparent cursor-pointer"
+                                                onclick="return confirm('Are you sure you want to delete this image?');">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-gray-500 text-center">No images available.</p>
+            {% endif %}
+        </div>
+
+    </div>
+{% endblock %}

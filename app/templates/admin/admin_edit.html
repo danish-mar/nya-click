@@ -1,0 +1,88 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Edit Image{% endblock %}
+
+{% block content %}
+    <div class="space-y-6">
+        <div class="flex items-center">
+            <a href="{{ url_for('api.admin_bp.dashboard') }}" class="text-apple-blue mr-2">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h1 class="text-3xl font-semibold text-apple-dark">Edit Image</h1>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
+            <!-- Current Image Preview -->
+            <div class="md:col-span-2">
+                <div class="apple-card p-6 shadow">
+                    <h2 class="text-lg font-medium text-apple-dark mb-4">Current Image</h2>
+                    <div class="aspect-w-1 aspect-h-1">
+                        <img src="{{ url_for('static', filename=image.location.replace('static/', '')) }}"
+                             alt="{{ image.title }}"
+                             class="object-cover w-full h-full rounded-lg shadow">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Form -->
+            <div class="md:col-span-3">
+                <div class="apple-card p-6 shadow">
+                    <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                        <div>
+                            <label for="title" class="block text-sm font-medium text-apple-gray mb-1">Title</label>
+                            <input type="text" id="title" name="title" value="{{ image.title }}" required
+                                   class="block w-full rounded-lg border-gray-200 p-3 text-sm focus:border-apple-blue focus:ring-apple-blue">
+                        </div>
+
+                        <div>
+                            <label for="desc" class="block text-sm font-medium text-apple-gray mb-1">Description</label>
+                            <textarea id="desc" name="desc" rows="4"
+                                      class="block w-full rounded-lg border-gray-200 p-3 text-sm focus:border-apple-blue focus:ring-apple-blue">{{ image.desc }}</textarea>
+                        </div>
+
+                        <div>
+                            <label for="file" class="block text-sm font-medium text-apple-gray mb-1">Replace Image (Optional)</label>
+                            <div class="mt-1 flex items-center">
+                                <div id="image-preview" class="hidden w-full mb-4">
+                                    <img id="preview-img" src="" alt="Preview" class="object-cover rounded-lg max-h-64 mx-auto">
+                                </div>
+                                <label class="w-full flex flex-col items-center px-4 py-6 bg-white rounded-lg border-2 border-dashed border-gray-300 cursor-pointer hover:bg-gray-50">
+                                    <div class="flex flex-col items-center justify-center">
+                                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                        </svg>
+                                        <p class="mt-2 text-sm text-apple-gray">Drag and drop or click to select</p>
+                                        <p class="text-xs text-apple-gray">PNG, JPG, JPEG, GIF up to 10MB</p>
+                                    </div>
+                                    <input id="file" name="file" type="file" class="hidden" accept=".png,.jpg,.jpeg,.gif" onchange="showPreview(this)"/>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end">
+                            <a href="{{ url_for('api.admin_bp.dashboard') }}" class="mr-3 px-6 py-2 border border-gray-300 rounded-full text-apple-gray font-medium hover:bg-gray-50">
+                                Cancel
+                            </a>
+                            <button type="submit" class="apple-btn text-white px-6 py-2 font-medium">
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showPreview(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('preview-img').src = e.target.result;
+                    document.getElementById('image-preview').classList.remove('hidden');
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+{% endblock %}

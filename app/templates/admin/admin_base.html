@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Dashboard{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        apple: {
+                            light: '#f5f5f7',
+                            dark: '#1d1d1f',
+                            gray: '#86868b',
+                            blue: '#0071e3',
+                            hover: '#0077ED'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'San Francisco', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        .apple-btn {
+            background-color: #0071e3;
+            border-radius: 980px;
+            padding: 0.25rem 1rem;
+            transition: all 0.2s ease;
+        }
+        .apple-btn:hover {
+            background-color: #0077ED;
+        }
+        .apple-card {
+            border-radius: 18px;
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+<body class="bg-apple-light min-h-screen">
+<!-- Top Navigation -->
+{% if is_admin_logged_in() %}
+    <nav class="sticky top-0 z-50 bg-white bg-opacity-80 backdrop-filter backdrop-blur-lg border-b border-gray-100 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="{{ url_for('api.admin_bp.dashboard') }}" class="text-xl font-medium text-apple-dark">
+                        <i class="fas fa-images mr-2"></i>Admin Panel
+                    </a>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a href="{{ url_for('api.admin_bp.dashboard') }}" class="text-gray-600 hover:text-apple-blue transition-colors duration-200">
+                        <i class="fas fa-chart-bar mr-1"></i> Dashboard
+                    </a>
+                    <a href="{{ url_for('api.admin_bp.upload_image') }}" class="text-gray-600 hover:text-apple-blue transition-colors duration-200">
+                        <i class="fas fa-upload mr-1"></i> Upload
+                    </a>
+                    <a href="{{ url_for('api.admin_bp.userbase') }}" class="text-gray-600 hover:text-apple-blue transition-colors duration-200">
+                        <i class="fas fa-users mr-1"></i> Users
+                    </a>
+                    <a href="{{ url_for('api.admin_bp.admin_logout') }}" class="text-gray-600 hover:text-apple-blue transition-colors duration-200">
+                        <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+{% endif %}
+
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-4">
+            {% for category, message in messages %}
+                <div class="{% if category == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %} p-4 rounded-lg mb-2">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<!-- Main Content -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    {% block content %}{% endblock %}
+</main>
+
+<!-- Footer -->
+<footer class="bg-white bg-opacity-80 backdrop-filter backdrop-blur-lg py-4 border-t border-gray-100 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-apple-gray text-sm">
+        <p>©2025 PhotoClick. All rights reserved.</p>
+    </div>
+</footer>
+</body>
+</html>

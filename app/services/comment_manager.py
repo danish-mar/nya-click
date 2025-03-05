@@ -1,4 +1,5 @@
-from app.models import Comment, db
+from app.models import Comment, db, User
+
 
 class CommentManager:
     @staticmethod
@@ -11,5 +12,10 @@ class CommentManager:
 
     @staticmethod
     def get_comments_by_image(image_id):
-        """Get all comments for a specific image"""
-        return Comment.query.filter_by(image_id=image_id).all()
+        """Get all comments for a specific image with usernames"""
+        return (
+            db.session.query(Comment.comment_id, Comment.comment, Comment.created_at, User.username)
+            .join(User, Comment.user_id == User.user_id)  # ✅ Join with User table
+            .filter(Comment.image_id == image_id)
+            .all()
+        )

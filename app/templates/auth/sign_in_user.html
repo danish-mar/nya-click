@@ -1,0 +1,175 @@
+<!-- app/templates/signin.html -->
+{% extends 'base.html' %}
+
+{% block title %}Sign In - PhotoClick{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center px-4 py-12 bg-light">
+    <div class="w-full max-w-md">
+        <!-- Sign In Card -->
+        <div class="bg-white shadow-sm rounded-2xl p-8 md:p-10">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-semibold text-dark mb-2">Sign in</h1>
+                <p class="text-secondary text-sm">Access your PhotoClick account</p>
+            </div>
+            
+            <!-- Alert for errors (hidden by default) -->
+            <div id="signin-error" class="bg-red-50 text-red-600 rounded-xl p-4 mb-6 text-sm hidden">
+                <p id="error-message"></p>
+            </div>
+            
+            <!-- Form -->
+            <form id="signin-form" class="space-y-6">
+                <!-- Email Field -->
+                <div>
+                    <label for="email" class="block text-dark text-sm font-medium mb-2">Email</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        class="w-full px-4 py-3 bg-light border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-dark"
+                        placeholder="your.email@example.com"
+                        required
+                    >
+                </div>
+                
+                <!-- Password Field -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label for="password" class="block text-dark text-sm font-medium">Password</label>
+                        <a href="#" class="text-primary text-sm hover:underline">Forgot password?</a>
+                    </div>
+                    <div class="relative">
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            class="w-full px-4 py-3 bg-light border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-dark"
+                            placeholder="••••••••"
+                            required
+                        >
+                        <button 
+                            type="button"
+                            id="toggle-password"
+                            class="absolute right-3 top-3 text-secondary"
+                            aria-label="Toggle password visibility"
+                        >
+                            <i class="far fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Remember Me -->
+                <div class="flex items-center">
+                    <input 
+                        type="checkbox" 
+                        id="remember" 
+                        name="remember" 
+                        class="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
+                    >
+                    <label for="remember" class="ml-2 block text-sm text-secondary">
+                        Remember me
+                    </label>
+                </div>
+                
+                <!-- Submit Button -->
+                <button 
+                    type="submit"
+                    class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-3 px-4 rounded-xl transition duration-200 ease-in-out transform hover:scale-[1.02] active:scale-[0.98]"
+                >
+                    <span id="signin-button-text">Sign In</span>
+                    <span id="signin-loading" class="hidden">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </span>
+                </button>
+                
+                <!-- Admin Sign-in Link -->
+                <div class="text-center mt-3">
+                    <a href="/admin/login" class="text-primary text-sm hover:underline">Sign in as administrator</a>
+                </div>
+            </form>
+            
+            <!-- Sign Up Link -->
+            <div class="text-center mt-8 pt-6 border-t border-gray-100">
+                <p class="text-secondary text-sm">
+                    Don't have an account? 
+                    <a href="/auth/register" class="text-primary font-medium hover:underline">Create one now</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Get form elements
+        const signinForm = document.getElementById('signin-form');
+        const errorDiv = document.getElementById('signin-error');
+        const errorMessage = document.getElementById('error-message');
+        const signinButtonText = document.getElementById('signin-button-text');
+        const signinLoading = document.getElementById('signin-loading');
+        const togglePasswordButton = document.getElementById('toggle-password');
+        const passwordInput = document.getElementById('password');
+        
+        // Toggle password visibility
+        togglePasswordButton.addEventListener('click', () => {
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+            
+            // Toggle icon
+            const icon = togglePasswordButton.querySelector('i');
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        });
+        
+        // Handle form submission
+        signinForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Hide any previous errors
+            errorDiv.classList.add('hidden');
+            
+            // Show loading state
+            signinButtonText.classList.add('hidden');
+            signinLoading.classList.remove('hidden');
+            
+            // Get form data
+            const email = signinForm.email.value;
+            const password = signinForm.password.value;
+            
+            try {
+                const response = await fetch('/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password }),
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to sign in');
+                }
+                
+                // Save session token to localStorage
+                localStorage.setItem('sessionToken', data.session_token);
+
+                // Redirect to sign-in page on success and set is_loggedin = true
+                localStorage.setItem("is_loggedin", "true");
+                window.location.href = '/';
+                
+            } catch (error) {
+                // Show error message
+                errorMessage.textContent = error.message;
+                errorDiv.classList.remove('hidden');
+                
+                // Reset button state
+                signinButtonText.classList.remove('hidden');
+                signinLoading.classList.add('hidden');
+            }
+        });
+    });
+</script>
+{% endblock %}

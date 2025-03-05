@@ -70,11 +70,15 @@
                 </div>
 
                 <!-- User Actions -->
-                <div class="hidden md:flex items-center space-x-4">
-                    <a href="#" class="text-dark hover:text-primary text-sm font-medium">
+                <div id="user-actions" class="hidden md:flex items-center space-x-4">
+                    <a href="/auth/signin" id="signin-link" class="text-dark hover:text-primary text-sm font-medium">
                         <i class="fas fa-user mr-1"></i> Sign In
                     </a>
+                    <a href="/auth/logout" id="user-icon" class="hidden text-dark hover:text-primary text-sm font-medium">
+                        <i class="fas fa-user-circle text-lg"></i>
+                    </a>
                 </div>
+
 
                 <!-- Mobile Menu Button -->
                 <button id="mobile-menu-button" class="md:hidden text-dark focus:outline-none" aria-label="Toggle Mobile Menu">
@@ -89,7 +93,7 @@
                     <a href="#" class="text-dark hover:text-primary text-sm">Gallery</a>
                     <a href="#" class="text-dark hover:text-primary text-sm">About</a>
                     <a href="#" class="text-dark hover:text-primary text-sm">Contact</a>
-                    <a href="#" class="text-dark hover:text-primary text-sm"><i class="fas fa-user mr-1"></i> Sign In</a>
+                    <a href="/auth/signin" class="text-dark hover:text-primary text-sm"><i class="fas fa-user mr-1"></i> Sign In</a>
                 </div>
             </div>
         </div>
@@ -110,6 +114,18 @@
 
     <!-- JavaScript to toggle mobile menu -->
     <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const isLoggedIn = localStorage.getItem("is_loggedin") === "true";
+            const signinLink = document.getElementById("signin-link");
+            const userIcon = document.getElementById("user-icon");
+
+            if (isLoggedIn) {
+                signinLink.classList.add("hidden"); // Hide "Sign In"
+                userIcon.classList.remove("hidden"); // Show User Icon
+            }
+        });
+
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
 
@@ -117,5 +133,7 @@
             mobileMenu.classList.toggle('hidden');
         });
     </script>
+
+
 </body>
 </html>

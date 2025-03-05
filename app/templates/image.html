@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %} {{ image.title }} - PhotoClick {% endblock %}
+
+{% block content %}
+    <div class="container mx-auto p-6">
+        <!-- Image Card -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <img src="{{ image.location }}" alt="{{ image.title }}" class="w-full h-auto rounded-lg">
+
+            <h1 class="text-2xl font-bold mt-4">{{ image.title }}</h1>
+            <p class="text-gray-600">{{ image.desc }}</p>
+            <p class="text-gray-400 text-sm mt-2">Uploaded on {{ image.date.strftime('%Y-%m-%d') }}</p>
+
+            <!-- Like Button -->
+            <div class="mt-4">
+                <button id="like-btn" class="btn-primary text-white px-4 py-2 rounded">
+                    <i class="fas fa-heart"></i> Like (<span id="like-count">{{ image.like_count }}</span>)
+                </button>
+            </div>
+        </div>
+
+        <!-- Comment Section -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mt-6">
+            <h2 class="text-xl font-semibold mb-4">Comments</h2>
+
+            <!-- Comment Input -->
+            <div class="mb-4">
+                <textarea id="comment-input" class="w-full border rounded p-2" placeholder="Add a comment..."></textarea>
+                <button id="comment-btn" class="btn-primary text-white px-4 py-2 rounded mt-2">Post Comment</button>
+            </div>
+
+            <!-- Comment List -->
+            <div id="comments-section">
+                {% for comment in comments %}
+                    <div class="border-b py-2">
+                        <p class="text-gray-700"><strong>{{ comment.username }}</strong>: {{ comment.comment }}</p>
+                        <p class="text-gray-400 text-sm">{{ comment.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JavaScript for AJAX Like & Comment Actions -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const likeBtn = document.getElementById("like-btn");
+            const likeCount = document.getElementById("like-count");
+            const commentBtn = document.getElementById("comment-btn");
+            const commentInput = document.getElementById("comment-input");
+            const commentsSection = document.getElementById("comments-section");
+
+            const imageId = {{ image.image_id }};
+            const sessionToken = localStorage.getItem("sessionToken"); // Get token
+
+            // 🔹 Function to handle 401 Unauthorized
+            function handleUnauthorized(response) {
+                if (response.status === 401) {
+                    window.location.href = "/auth/signin"; // Redirect to login page
+                    return true; // Indicate unauthorized response
+                }
+                return false;
+            }
+
+            // Handle Like Button
+            likeBtn.addEventListener("click", function () {
+                fetch(`/api/image/${imageId}/like`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": sessionToken
+                    }
+                })
+                    .then(response => {
+                        if (handleUnauthorized(response)) return; // Check for 401
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data && data.message === "Image liked!") {
+                            likeCount.textContent = parseInt(likeCount.textContent) + 1;
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
+            });
+
+            // Handle Comment Posting
+            commentBtn.addEventListener("click", function () {
+                const commentText = commentInput.value.trim();
+                if (!commentText) return;
+
+                fetch(`/api/comments/${imageId}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": sessionToken
+                    },
+                    body: JSON.stringify({ comment: commentText })
+                })
+                    .then(response => {
+                        if (handleUnauthorized(response)) return; // Check for 401
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data && data.message === "Comment added!") {
+                            const newComment = document.createElement("div");
+                            newComment.classList.add("border-b", "py-2");
+                            newComment.innerHTML = `
+                        <p class="text-gray-700"><strong>You</strong>: ${commentText}</p>
+                        <p class="text-gray-400 text-sm">Just now</p>
+                    `;
+                            commentsSection.prepend(newComment);
+                            commentInput.value = ""; // Clear input
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
+            });
+        });
+    </script>
+
+{% endblock %}

@@ -1,0 +1,208 @@
+<!-- app/templates/signup.html -->
+{% extends 'base.html' %}
+
+{% block title %}Create Account - PhotoClick{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center px-4 py-12 bg-light">
+    <div class="w-full max-w-md">
+        <!-- Sign Up Card -->
+        <div class="bg-white shadow-sm rounded-2xl p-8 md:p-10">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-semibold text-dark mb-2">Create Account</h1>
+                <p class="text-secondary text-sm">Join PhotoClick to share your moments</p>
+            </div>
+            
+            <!-- Alert for errors (hidden by default) -->
+            <div id="signup-error" class="bg-red-50 text-red-600 rounded-xl p-4 mb-6 text-sm hidden">
+                <p id="error-message"></p>
+            </div>
+            
+            <!-- Form -->
+            <form id="signup-form" class="space-y-5">
+                <!-- Username Field -->
+                <div>
+                    <label for="username" class="block text-dark text-sm font-medium mb-2">Username</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        class="w-full px-4 py-3 bg-light border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-dark"
+                        placeholder="Choose a username"
+                        required
+                    >
+                </div>
+                
+                <!-- Email Field -->
+                <div>
+                    <label for="email" class="block text-dark text-sm font-medium mb-2">Email</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        class="w-full px-4 py-3 bg-light border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-dark"
+                        placeholder="your.email@example.com"
+                        required
+                    >
+                </div>
+                
+                <!-- Password Field -->
+                <div>
+                    <label for="password" class="block text-dark text-sm font-medium mb-2">Password</label>
+                    <div class="relative">
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            class="w-full px-4 py-3 bg-light border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-dark"
+                            placeholder="Create a password"
+                            required
+                            minlength="8"
+                        >
+                        <button 
+                            type="button"
+                            id="toggle-password"
+                            class="absolute right-3 top-3 text-secondary"
+                            aria-label="Toggle password visibility"
+                        >
+                            <i class="far fa-eye"></i>
+                        </button>
+                    </div>
+                    <p class="mt-1 text-xs text-secondary">Must be at least 8 characters long</p>
+                </div>
+                
+                <!-- Confirm Password Field -->
+                <div>
+                    <label for="confirm-password" class="block text-dark text-sm font-medium mb-2">Confirm Password</label>
+                    <input 
+                        type="password" 
+                        id="confirm-password" 
+                        name="confirm-password" 
+                        class="w-full px-4 py-3 bg-light border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-dark"
+                        placeholder="Confirm your password"
+                        required
+                    >
+                </div>
+                
+                <!-- Terms and Conditions -->
+                <div class="flex items-start">
+                    <div class="flex items-center h-5">
+                        <input 
+                            type="checkbox" 
+                            id="terms" 
+                            name="terms" 
+                            required
+                            class="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
+                        >
+                    </div>
+                    <div class="ml-3 text-sm">
+                        <label for="terms" class="text-secondary">
+                            I agree to the <a href="#" class="text-primary hover:underline">Terms of Service</a> and <a href="#" class="text-primary hover:underline">Privacy Policy</a>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Submit Button -->
+                <button 
+                    type="submit"
+                    class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-3 px-4 rounded-xl transition duration-200 ease-in-out transform hover:scale-[1.02] active:scale-[0.98]"
+                >
+                    <span id="signup-button-text">Create Account</span>
+                    <span id="signup-loading" class="hidden">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </span>
+                </button>
+            </form>
+            
+            <!-- Sign In Link -->
+            <div class="text-center mt-8 pt-6 border-t border-gray-100">
+                <p class="text-secondary text-sm">
+                    Already have an account? 
+                    <a href="/auth/signin" class="text-primary font-medium hover:underline">Sign in</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Get form elements
+        const signupForm = document.getElementById('signup-form');
+        const errorDiv = document.getElementById('signup-error');
+        const errorMessage = document.getElementById('error-message');
+        const signupButtonText = document.getElementById('signup-button-text');
+        const signupLoading = document.getElementById('signup-loading');
+        const togglePasswordButton = document.getElementById('toggle-password');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirm-password');
+        
+        // Toggle password visibility
+        togglePasswordButton.addEventListener('click', () => {
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+            
+            // Toggle icon
+            const icon = togglePasswordButton.querySelector('i');
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        });
+        
+        // Handle form submission
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Hide any previous errors
+            errorDiv.classList.add('hidden');
+            
+            // Validate passwords match
+            if (passwordInput.value !== confirmPasswordInput.value) {
+                errorMessage.textContent = 'Passwords do not match';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+            
+            // Show loading state
+            signupButtonText.classList.add('hidden');
+            signupLoading.classList.remove('hidden');
+            
+            // Get form data
+            const username = signupForm.username.value;
+            const email = signupForm.email.value;
+            const password = signupForm.password.value;
+            
+            try {
+                // Note: You'll need to implement this endpoint in your Flask app
+                const response = await fetch('/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, email, password }),
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to create account');
+                }
+
+                // Redirect to sign-in page on success and set is_loggedin = true
+                localStorage.setItem("is_loggedin", "true");
+                window.location.href = '/';
+
+                
+            } catch (error) {
+                // Show error message
+                errorMessage.textContent = error.message;
+                errorDiv.classList.remove('hidden');
+                
+                // Reset button state
+                signupButtonText.classList.remove('hidden');
+                signupLoading.classList.add('hidden');
+            }
+        });
+    });
+</script>
+{% endblock %}

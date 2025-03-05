@@ -12,7 +12,7 @@ def get_comments(image_id):
     comments = CommentManager.get_comments_by_image(image_id)
     return jsonify([{
         'comment_id': c.comment_id,
-        'user_id': c.user_id,
+        'user_id': c.user.username,
         'comment': c.comment,
         'created_at': c.created_at.strftime('%Y-%m-%d %H:%M:%S')
     } for c in comments])
@@ -22,7 +22,7 @@ def get_comments(image_id):
 @login_required
 def add_comment(image_id):
     """Add a new comment to an image"""
-    session_token = request.headers.get('Authorization')
+    session_token = request.cookies.get("session_id")
     user_id = AuthManager.get_user(session_token)
     if not user_id:
         return jsonify({'error': 'Invalid session'}), 401

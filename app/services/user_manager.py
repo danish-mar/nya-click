@@ -28,10 +28,16 @@ class UserManager:
             return {'error': 'Email already in use'}, 400
 
         hashed_password = generate_password_hash(password)
-        new_user = User.query.create(username=username, email=email, password=hashed_password)
+
+        # ✅ Correct way to create a user
+        new_user = User(username=username, email=email, password=hashed_password)
+
         db.session.add(new_user)
         db.session.commit()
-        return new_user
+
+        return new_user  # ✅ Return the created user
+
+
 
     @staticmethod
     def verify_password(user, password):
